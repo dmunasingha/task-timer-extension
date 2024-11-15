@@ -2,7 +2,6 @@
 
 A modern, beautiful browser extension for tracking time spent on tasks with pause/resume functionality. Built with React, TypeScript, and Tailwind CSS.
 
-![TaskTimer](https://raw.githubusercontent.com/dmunasingha/task-timer-extension/main/screenshots/demo.png)
 
 ## Features
 
