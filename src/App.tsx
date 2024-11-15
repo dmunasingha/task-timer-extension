@@ -52,7 +52,7 @@ function App() {
   };
 
   return (
-    <div className="w-[350px] min-h-[400px] bg-gray-50">
+    <div className="min-w-[350px] min-h-[400px] bg-gray-50">
       <header className="bg-indigo-600 text-white p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -82,22 +82,20 @@ function App() {
         )}
       </main>
 
-      <footer className="absolute bottom-0 w-full border-t border-gray-200">
+      <footer className="fixed bottom-0 w-full border-t bg-white border-gray-200">
         <div className="flex justify-around p-3">
           <button
             onClick={() => setView('timer')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-              view === 'timer' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${view === 'timer' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <Timer className="w-5 h-5" />
             Timer
           </button>
           <button
             onClick={() => setView('history')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-              view === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${view === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <History className="w-5 h-5" />
             History
