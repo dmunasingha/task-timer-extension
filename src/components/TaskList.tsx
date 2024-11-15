@@ -30,7 +30,7 @@ export default function TaskList({ tasks }: TaskListProps) {
           No tasks recorded yet
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {tasks.map((task) => (
             <div
               key={task.id}

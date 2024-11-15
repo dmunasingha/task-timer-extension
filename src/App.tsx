@@ -29,16 +29,46 @@ function App() {
       name: taskName,
       startTime: Date.now(),
       duration: 0,
-      status: 'running'
+      status: 'running',
+      totalPausedTime: 0
     };
     setActiveTask(newTask);
     chromeApi.storage.local.set({ activeTask: newTask });
     chromeApi.runtime.sendMessage({ type: 'START_TIMER', task: newTask });
   };
 
+  const pauseTimer = () => {
+    if (activeTask && activeTask.status === 'running') {
+      const pausedTask: Task = {
+        ...activeTask,
+        status: 'paused',
+        pausedAt: Date.now()
+      };
+      setActiveTask(pausedTask);
+      chromeApi.storage.local.set({ activeTask: pausedTask });
+      chromeApi.runtime.sendMessage({ type: 'PAUSE_TIMER', task: pausedTask });
+    }
+  };
+
+  const resumeTimer = () => {
+    if (activeTask && activeTask.status === 'paused' && activeTask.pausedAt) {
+      const pauseDuration = Date.now() - activeTask.pausedAt;
+      const resumedTask: Task = {
+        ...activeTask,
+        status: 'running',
+        totalPausedTime: (activeTask.totalPausedTime || 0) + pauseDuration,
+        pausedAt: undefined
+      };
+      setActiveTask(resumedTask);
+      chromeApi.storage.local.set({ activeTask: resumedTask });
+      chromeApi.runtime.sendMessage({ type: 'RESUME_TIMER', task: resumedTask });
+    }
+  };
+
   const stopTimer = () => {
     if (activeTask) {
-      const duration = Date.now() - activeTask.startTime;
+      const totalPaused = activeTask.totalPausedTime || 0;
+      const duration = Date.now() - activeTask.startTime - totalPaused;
       const completedTask: Task = {
         ...activeTask,
         duration,
@@ -52,7 +82,7 @@ function App() {
   };
 
   return (
-    <div className="w-[350px] min-h-[400px] bg-gray-50">
+    <div className="min-w-[350px] min-h-[400px] bg-gray-50">
       <header className="bg-indigo-600 text-white p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -75,6 +105,8 @@ function App() {
               activeTask={activeTask}
               onStart={startTimer}
               onStop={stopTimer}
+              onPause={pauseTimer}
+              onResume={resumeTimer}
             />
           </div>
         ) : (
@@ -82,22 +114,20 @@ function App() {
         )}
       </main>
 
-      <footer className="absolute bottom-0 w-full border-t border-gray-200">
+      <footer className="fixed bottom-0 w-full border-t bg-white border-gray-200">
         <div className="flex justify-around p-3">
           <button
             onClick={() => setView('timer')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-              view === 'timer' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${view === 'timer' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <Timer className="w-5 h-5" />
             Timer
           </button>
           <button
             onClick={() => setView('history')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-              view === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${view === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
             <History className="w-5 h-5" />
             History

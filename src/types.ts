@@ -3,5 +3,7 @@ export interface Task {
   name: string;
   startTime: number;
   duration: number;
-  status: 'running' | 'completed';
+  status: 'running' | 'paused' | 'completed';
+  pausedAt?: number;
+  totalPausedTime?: number;
 }
