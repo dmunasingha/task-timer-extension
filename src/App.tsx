@@ -29,16 +29,46 @@ function App() {
       name: taskName,
       startTime: Date.now(),
       duration: 0,
-      status: 'running'
+      status: 'running',
+      totalPausedTime: 0
     };
     setActiveTask(newTask);
     chromeApi.storage.local.set({ activeTask: newTask });
     chromeApi.runtime.sendMessage({ type: 'START_TIMER', task: newTask });
   };
 
+  const pauseTimer = () => {
+    if (activeTask && activeTask.status === 'running') {
+      const pausedTask: Task = {
+        ...activeTask,
+        status: 'paused',
+        pausedAt: Date.now()
+      };
+      setActiveTask(pausedTask);
+      chromeApi.storage.local.set({ activeTask: pausedTask });
+      chromeApi.runtime.sendMessage({ type: 'PAUSE_TIMER', task: pausedTask });
+    }
+  };
+
+  const resumeTimer = () => {
+    if (activeTask && activeTask.status === 'paused' && activeTask.pausedAt) {
+      const pauseDuration = Date.now() - activeTask.pausedAt;
+      const resumedTask: Task = {
+        ...activeTask,
+        status: 'running',
+        totalPausedTime: (activeTask.totalPausedTime || 0) + pauseDuration,
+        pausedAt: undefined
+      };
+      setActiveTask(resumedTask);
+      chromeApi.storage.local.set({ activeTask: resumedTask });
+      chromeApi.runtime.sendMessage({ type: 'RESUME_TIMER', task: resumedTask });
+    }
+  };
+
   const stopTimer = () => {
     if (activeTask) {
-      const duration = Date.now() - activeTask.startTime;
+      const totalPaused = activeTask.totalPausedTime || 0;
+      const duration = Date.now() - activeTask.startTime - totalPaused;
       const completedTask: Task = {
         ...activeTask,
         duration,
@@ -75,6 +105,8 @@ function App() {
               activeTask={activeTask}
               onStart={startTimer}
               onStop={stopTimer}
+              onPause={pauseTimer}
+              onResume={resumeTimer}
             />
           </div>
         ) : (

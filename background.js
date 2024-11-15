@@ -13,7 +13,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateBadge('⏱️');
     return true;
   }
-  
+
+  if (message.type === 'PAUSE_TIMER') {
+    const { task } = message;
+    activeTimers.set(task.id, task);
+    updateBadge('⏸️');
+    return true;
+  }
+
+  if (message.type === 'RESUME_TIMER') {
+    const { task } = message;
+    activeTimers.set(task.id, task);
+    updateBadge('⏱️');
+    return true;
+  }
+
   if (message.type === 'STOP_TIMER') {
     const { taskId } = message;
     activeTimers.delete(taskId);
@@ -27,7 +41,8 @@ chrome.alarms.create('keepAlive', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'keepAlive') {
     if (activeTimers.size > 0) {
-      updateBadge('⏱️');
+      const timer = Array.from(activeTimers.values())[0];
+      updateBadge(timer.status === 'paused' ? '⏸️' : '⏱️');
     }
   }
 });

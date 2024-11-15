@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Square, Clock } from 'lucide-react';
+import { Play, Square, Clock, Pause, PlayCircle } from 'lucide-react';
 import { Task } from '../types';
 
 interface TimerProps {
   activeTask: Task | null;
   onStart: (taskName: string) => void;
   onStop: () => void;
+  onPause: () => void;
+  onResume: () => void;
 }
 
-export default function Timer({ activeTask, onStart, onStop }: TimerProps) {
+export default function Timer({ activeTask, onStart, onStop, onPause, onResume }: TimerProps) {
   const [taskName, setTaskName] = useState('');
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
     let interval: number;
-    if (activeTask) {
+    if (activeTask && activeTask.status === 'running') {
       interval = setInterval(() => {
-        setElapsed(Date.now() - activeTask.startTime);
+        const totalPaused = activeTask.totalPausedTime || 0;
+        setElapsed(Date.now() - activeTask.startTime - totalPaused);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -61,13 +64,31 @@ export default function Timer({ activeTask, onStart, onStop }: TimerProps) {
               <Clock className="w-6 h-6 mr-2" />
               {formatTime(elapsed)}
             </div>
-            <button
-              onClick={onStop}
-              className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
-            >
-              <Square className="w-5 h-5" />
-              Stop Timer
-            </button>
+            <div className="w-full flex items-center justify-center gap-2">
+
+              <button
+                onClick={onStop}
+                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+              >
+                <Square className="w-5 h-5" />
+                Stop Timer
+              </button>
+              {activeTask.status === 'running' ? (
+                <button
+                  onClick={onPause}
+                  className="flex items-center justify-center gap-2 bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition-colors"
+                >
+                  <Pause />
+                </button>
+              ) : (
+                <button
+                  onClick={onResume}
+                  className="flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  <PlayCircle />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
